@@ -1,0 +1,39 @@
+{
+  "format_code": "M",
+  "number_of_legs_encoded": 1,
+  "passenger_name": "DESMARAIS/LUC",
+  "electronic_ticket_indicator": "E",
+  "version_number": 5,
+  "passenger_description": "1",
+  "source_of_check_in": "W",
+  "source_of_boarding_pass_issuance": "W",
+  "date_of_issue_of_boarding_pass": "2021-11-21",
+  "document_type": "B",
+  "airline_designator_of_boarding_pass_issuer": "AC",
+  "baggage_tag_license_plate_number": "0014123456002",
+  "first_non_consecutive_baggage_tag_license_plate_number": "0014123467001",
+  "second_non_consecutive_baggage_tag_license_plate_number": "0014123478901",
+  "legs": [
+    {
+      "operating_carrier_pnr_code": "ABC123",
+      "from_city_airport_code": "YUL",
+      "to_city_airport_code": "FRA",
+      "operating_carrier_designator": "AC",
+      "flight_number": "0834",
+      "date_of_flight": "2021-11-21",
+      "compartment_code": "J",
+      "seat_number": "001A",
+      "check_in_sequence_number": "0025",
+      "passenger_status": "1",
+      "airline_numeric_code": "014",
+      "document_form_serial_number": "1234567890",
+      "international_documentation_verification": "1",
+      "marketing_carrier_designator": "AC",
+      "frequent_flyer_airline_designator": "AC",
+      "frequent_flyer_number": "1234567890123",
+      "free_baggage_allowance": "4PC",
+      "fast_track": "Y",
+      "for_individual_airline_use": "LX58Z"
+    }
+  ]
+}

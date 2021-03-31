@@ -1,0 +1,22 @@
+{
+  "format_code": "M",
+  "number_of_legs_encoded": 1,
+  "passenger_name": "DESMARAIS/LUC",
+  "electronic_ticket_indicator": "E",
+  "legs": [
+    {
+      "operating_carrier_pnr_code": "ABC123",
+      "from_city_airport_code": "YUL",
+      "to_city_airport_code": "FRA",
+      "operating_carrier_designator": "AC",
+      "flight_number": "0834",
+      "date_of_flight": "2021-11-22",
+      "compartment_code": "J",
+      "seat_number": "001A",
+      "check_in_sequence_number": "0025",
+      "passenger_status": "1"
+    }
+  ],
+  "type_of_security_data": "1",
+  "security_data": "GIWVC5EH7JNT684FVNJ91W2QA4DVN5J8K4F0L0GEQ3DF5TGBN8709HKT5D3DW3GBHFCVHMY7J5T6HFR41W2QA4DVN5J8K4F0L0GE"
+}

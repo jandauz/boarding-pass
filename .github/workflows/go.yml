@@ -3,24 +3,33 @@ name: Go
 on:
   push:
     branches: [ main ]
+    paths: ['**.go', 'go.mod']
   pull_request:
-    branches: [ main ]
+    paths: ['**.go', 'go.mod', '.github/workflows/go.yml']
   workflow_dispatch:
 
 jobs:
 
-  build:
-    runs-on: ubuntu-latest
+  test:
+    name: Test
+    strategy:
+      matrix:
+        go-version: [1.16.x]
+        platform: [ubuntu, macos, windows]
+    runs-on: ${{ matrix.platform }}-latest
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Set up Go
-      uses: actions/setup-go@v2
+    - uses: actions/setup-go@v1
       with:
-        go-version: 1.16
+        go-version: ${{ matrix.go-version }}
+        
+    - uses: actions/checkout@v2
+    
+    - uses: actions/cache@v1
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
 
-    - name: Build
-      run: go build -v ./...
-
-    - name: Test
-      run: go test -v ./...
+    - name: Run unit tests
+      run: go test -v -race -coverprofile=coverage -covermode=atomic ./...

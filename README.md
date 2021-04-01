@@ -1,5 +1,6 @@
 # boarding-pass
 [![Go Reference](https://pkg.go.dev/badge/github.com/jandauz/boarding-pass/bcbp.svg)](https://pkg.go.dev/github.com/jandauz/boarding-pass/bcbp)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjandauz%2Fboarding-pass.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjandauz%2Fboarding-pass?ref=badge_shield)
 
 boarding-pass is a partial [Go](https://golang.org) port of
 [georgesmith64/bcbp](https://github.com/georgesmith46/bcbp) with some
@@ -112,3 +113,7 @@ BenchmarkFromStr_Full_Multi
 BenchmarkFromStr_Full_Multi-12                      	  455092	      2682 ns/op	      16 B/op	       1 allocs/op
 PASS
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjandauz%2Fboarding-pass.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjandauz%2Fboarding-pass?ref=badge_large)

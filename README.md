@@ -1,11 +1,11 @@
-# boarding-pass 
+# boarding-pass
 [![Go Reference](https://pkg.go.dev/badge/github.com/jandauz/boarding-pass/bcbp.svg)](https://pkg.go.dev/github.com/jandauz/boarding-pass/bcbp)
 
-boarding-pass is a partial [Go](https://golang.org) port of 
+boarding-pass is a partial [Go](https://golang.org) port of
 [georgesmith64/bcbp](https://github.com/georgesmith46/bcbp) with some
 inspiration from [martinmroz/iata_bcbp](https://github.com/martinmroz/iata_bcbp).
 
-The main difference between the libraries is that 
+The main difference between the libraries is that
 [boarding-pass](https://github.com/jandauz/boarding-pass) only offers users the
 ability to decode the data in a Bar Coded Boarding Pass into structured data.
 
@@ -80,14 +80,14 @@ func main() {
 
 ## Notes
 [boarding-pass](https://github.com/jandauz/boarding-pass) currently does not
-attempt to interpret the data except for`NumberOfLegsEncoded`, `DateOfFlight`, 
+attempt to interpret the data except for`NumberOfLegsEncoded`, `DateOfFlight`,
 and `DateOfBoardingPassIssuance`.
 
 `NumberOfLegsEncoded` is a `uint`. This is necessary for determing how many
-`Legs` to process. 
+`Legs` to process.
 
 Both `DateOfFlight` and `DateOfBoardingPassIssuance` are
-strings formatted using 
+strings formatted using
 [RFC 3339 full-date format](https://tools.ietf.org/html/rfc3339#section-5.6).
 There is currently no attempt to determine if the values are realistic dates
 e.g. an unrealistic date would be on that is far ahead in the future.
@@ -97,7 +97,7 @@ e.g. an unrealistic date would be on that is far ahead in the future.
 goos: windows
 goarch: amd64
 pkg: github.com/jandauz/boarding-pass
-cpu: AMD Ryzen 5 3600 6-Core Processor              
+cpu: AMD Ryzen 5 3600 6-Core Processor
 BenchmarkFromStr_Mandatory_No_Security_Single
 BenchmarkFromStr_Mandatory_No_Security_Single-12    	 1398615	       851.2 ns/op	      16 B/op	       1 allocs/op
 BenchmarkFromStr_Mandatory_Single

@@ -21,9 +21,9 @@ jobs:
     - uses: actions/setup-go@v1
       with:
         go-version: ${{ matrix.go-version }}
-        
+
     - uses: actions/checkout@v2
-    
+
     - uses: actions/cache@v1
       with:
         path: ~/go/pkg/mod
@@ -31,5 +31,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
 
-    - name: Run unit tests
-      run: go test -v -race -coverprofile=coverage -covermode=atomic ./...
+    - run: go test -v -race -coverprofile=coverage -covermode=atomic ./...
+
+    - uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage

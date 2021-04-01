@@ -36,3 +36,11 @@ jobs:
     - uses: codecov/codecov-action@v1
       with:
         file: ./coverage
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-contrib/golangci-lint@v1

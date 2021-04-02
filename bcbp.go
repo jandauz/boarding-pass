@@ -146,18 +146,14 @@ func (l Legs) MarshalJSON() ([]byte, error) {
         if l[i] == (Leg{}) {
             continue
         }
-        b, err := json.Marshal(l[i])
-        if err != nil {
-            return []byte{}, err
-        }
-        _, err = sb.Write(b)
-        if err != nil {
-            return []byte{}, err
-        }
-        _, err = sb.WriteString(",")
-        if err != nil {
-            return []byte{}, err
-        }
+
+        // Realistically should not return an error. According to the
+        // documentation, json.Marshal will return an UnsupportedTypeError if
+        // v is a channel, complex, or function value. Since Leg is a  data
+        // model for a flight segment it will only contain built-in types.
+        b, _ := json.Marshal(l[i])
+        sb.Write(b)
+        sb.WriteString(",")
     }
     return []byte("[" + strings.TrimSuffix(sb.String(), ",") + "]"), nil
 }

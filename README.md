@@ -1,4 +1,7 @@
 # boarding-pass
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/jandauz/boarding-pass/Go)
+![Codecov](https://img.shields.io/codecov/c/github/jandauz/boarding-pass)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jandauz/boarding-pass)](https://goreportcard.com/report/github.com/jandauz/boarding-pass)
 [![Go Reference](https://pkg.go.dev/badge/github.com/jandauz/boarding-pass/bcbp.svg)](https://pkg.go.dev/github.com/jandauz/boarding-pass/bcbp)
 
 boarding-pass is a partial [Go](https://golang.org) port of

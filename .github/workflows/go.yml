@@ -15,24 +15,40 @@ jobs:
     strategy:
       matrix:
         go-version: [1.16.x]
-        platform: [ubuntu, macos, windows]
-    runs-on: ${{ matrix.platform }}-latest
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
     steps:
-    - uses: actions/setup-go@v1
-      with:
-        go-version: ${{ matrix.go-version }}
+      - uses: actions/setup-go@v1
+        with:
+          go-version: ${{ matrix.go-version }}
 
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - uses: actions/cache@v1
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
+      - uses: actions/cache@v1
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
-    - run: go test -v -race -coverprofile=coverage -covermode=atomic ./...
+      - run: go test -v -race -coverprofile=coverage -covermode=atomic ./...
 
-    - uses: codecov/codecov-action@v1
-      with:
-        file: ./coverage
+      - uses: codecov/codecov-action@v1
+        with:
+          name: coverage
+          file: ./coverage
+
+      - uses: actions/upload-artifact@v1
+        with:
+          name: coverage
+          path: ./coverage
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest

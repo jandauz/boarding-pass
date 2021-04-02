@@ -1,4 +1,7 @@
 # boarding-pass
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/jandauz/boarding-pass/Go)
+![Codecov](https://img.shields.io/codecov/c/github/jandauz/boarding-pass)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jandauz/boarding-pass)](https://goreportcard.com/report/github.com/jandauz/boarding-pass)
 [![Go Reference](https://pkg.go.dev/badge/github.com/jandauz/boarding-pass/bcbp.svg)](https://pkg.go.dev/github.com/jandauz/boarding-pass/bcbp)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjandauz%2Fboarding-pass.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjandauz%2Fboarding-pass?ref=badge_shield)
 

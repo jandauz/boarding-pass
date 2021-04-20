@@ -50,7 +50,7 @@ const (
 	// change rather than an issue with usage.
 	ErrMalformedSpec ErrorType = "ErrMalformedSpec"
 
-	// UnknownData is used when decoding of the boarding pass data has
+	// ErrUnknownData is used when decoding of the boarding pass data has
 	// successfully completed, however, there are remaining unprocessed
 	// data. This error is more of a warning that indicates that there
 	// is extra data in the Bar Coded Boarding Pass.

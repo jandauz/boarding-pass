@@ -1,0 +1,6 @@
+bcbp: Invalid data format:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       EABC123 YULFRAAC 0834 326J001A0025 167>5321WW1325BAC 0014123456002001412346700100141234789012A0141234567890 1AC AC 1234567890123     2KYLX58Z"
+  |                                                                                                                                                            ^ got " 2K"
+  |
+  = reason: data for "Free Baggage Allowance" must be 2 digits with leading zeroes followed by K or L; or 1 digit followed by PC

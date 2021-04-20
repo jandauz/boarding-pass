@@ -1,0 +1,6 @@
+bcbp: Unknown data:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       EABC123 YULFRAAC 0834 326J001A0025 100^101ABCD123"
+  |                                                                   ^ got "6" character(s)
+  |
+  = reason: boarding pass successfully decoded but "BCD123" is unknown and has not been processed

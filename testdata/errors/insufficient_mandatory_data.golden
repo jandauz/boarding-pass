@@ -1,0 +1,6 @@
+bcbp: Insufficient data:
+  boarding pass data:
+  | "M"
+  |  ^ got "1" character(s)
+  |
+  = reason: boarding pass data must have at least 60 characters

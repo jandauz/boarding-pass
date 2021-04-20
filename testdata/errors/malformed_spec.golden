@@ -1,0 +1,10 @@
+bcbp: Malformed spec:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       EABC123 YULFRAAC 0834 326J001A0025 100^164GIWVC5EH7JNT684FVNJ91W2QA4DVN5J8K4F0L0GEQ3DF5TGBN8709HKT5D3DW3GBHFCVHMY7J5T6HFR41W2QA4DVN5J8K4F0L0GE"
+  |  ^ got "Format Code" item defines sub-section
+  |
+  = reason: only following items can define sub-sections:
+		- "Field Size of variable size field"
+		- "Field Size of following structured message - unique"
+		- "Field Size of following structured message - repeated"
+		- "Length of Security data"

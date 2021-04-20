@@ -1,0 +1,6 @@
+bcbp: Invalid data format:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       EABC123 YULFRAA C0834 326J001A0025 100"
+  |                                      ^ got "A C"
+  |
+  = reason: data for "Operating Carrier Designator" must be 3 alphanumeric characters with trailing whitespaces

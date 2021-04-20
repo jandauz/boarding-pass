@@ -1,0 +1,6 @@
+bcbp: Invalid data format:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       AABC123 YULFRAAC 0834 326J001A0025 100"
+  |                        ^ got "A"
+  |
+  = reason: data for "Electronic Ticket Indicator" must be E or L

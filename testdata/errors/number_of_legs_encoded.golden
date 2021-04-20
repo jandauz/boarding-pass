@@ -1,0 +1,6 @@
+bcbp: Invalid data format:
+  boarding pass data:
+  | "M0DESMARAIS/LUC       EABC123 YULFRAAC 0834 326J001A0025 100"
+  |   ^ got "0"
+  |
+  = reason: data for "Number of Legs Encoded" must be a number between 1 to 4

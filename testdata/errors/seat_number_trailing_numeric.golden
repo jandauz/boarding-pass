@@ -1,0 +1,6 @@
+bcbp: Invalid data format:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       EABC123 YULFRAAC 0834 326J00100025 100"
+  |                                                  ^ got "0010"
+  |
+  = reason: data for "Seat Number" must be 3 digits with leading zeroes followed by an alpha

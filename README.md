@@ -103,17 +103,17 @@ goarch: amd64
 pkg: github.com/jandauz/boarding-pass
 cpu: AMD Ryzen 5 3600 6-Core Processor
 BenchmarkFromStr_Mandatory_No_Security_Single
-BenchmarkFromStr_Mandatory_No_Security_Single-12    	 1398615	       851.2 ns/op	      16 B/op	       1 allocs/op
+BenchmarkFromStr_Mandatory_No_Security_Single-12    	  350959	      3261 ns/op	      16 B/op	       1 allocs/op
 BenchmarkFromStr_Mandatory_Single
-BenchmarkFromStr_Mandatory_Single-12                	 1231972	       973.1 ns/op	      16 B/op	       1 allocs/op
+BenchmarkFromStr_Mandatory_Single-12                	  226207	      5299 ns/op	      16 B/op	       1 allocs/op
 BenchmarkFromStr_Full_No_Security_Single
-BenchmarkFromStr_Full_No_Security_Single-12         	  722799	      1714 ns/op	      16 B/op	       1 allocs/op
+BenchmarkFromStr_Full_No_Security_Single-12         	  148012	      8169 ns/op	      16 B/op	       1 allocs/op
 BenchmarkFromStr_Full_Single
-BenchmarkFromStr_Full_Single-12                     	  663570	      1863 ns/op	      16 B/op	       1 allocs/op
+BenchmarkFromStr_Full_Single-12                     	  116398	     10138 ns/op	      16 B/op	       1 allocs/op
 BenchmarkFromStr_Full_No_Security_Multi
-BenchmarkFromStr_Full_No_Security_Multi-12          	  455092	      2559 ns/op	      16 B/op	       1 allocs/op
+BenchmarkFromStr_Full_No_Security_Multi-12          	   94401	     12638 ns/op	      16 B/op	       1 allocs/op
 BenchmarkFromStr_Full_Multi
-BenchmarkFromStr_Full_Multi-12                      	  455092	      2682 ns/op	      16 B/op	       1 allocs/op
+BenchmarkFromStr_Full_Multi-12                      	   81558	     14758 ns/op	      16 B/op	       1 allocs/op
 PASS
 ```
 

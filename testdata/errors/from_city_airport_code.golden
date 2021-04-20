@@ -1,0 +1,6 @@
+bcbp: Invalid data format:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       EABC123 1ULFRAAC 0834 326J001A0025 100"
+  |                                ^ got "1UL"
+  |
+  = reason: data for "From City Airport Code" must be 3 alpha characters

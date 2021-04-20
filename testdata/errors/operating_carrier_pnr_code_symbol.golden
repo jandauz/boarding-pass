@@ -1,0 +1,6 @@
+bcbp: Invalid data format:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       E!BC123 YULFRAAC 0834 326J001A0025 100"
+  |                         ^ got "!BC123 "
+  |
+  = reason: data for "Operating Carrier PNR Code" must be 7 alphanumeric characters with trailing whitespaces

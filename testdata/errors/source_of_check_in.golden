@@ -1,0 +1,6 @@
+bcbp: Invalid data format:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       EABC123 YULFRAAC 0834 326J001A0025 167>5321!W1325BAC 0014123456002001412346700100141234789012A0141234567890 1AC AC 1234567890123    4PCYLX58Z"
+  |                                                                   ^ got "!"
+  |
+  = reason: data for "Source of check-in" must be W, K, X, R, M, O, T, V, A, or whitespace

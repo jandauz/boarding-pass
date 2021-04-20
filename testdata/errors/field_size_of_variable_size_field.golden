@@ -1,0 +1,6 @@
+bcbp: Invalid data format:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       EABC123 YULFRAAC 0834 326J001A0025 1GG"
+  |                                                            ^ got "GG"
+  |
+  = reason: data for "Field Size of variable size field" must be a hex number with leading zeroes

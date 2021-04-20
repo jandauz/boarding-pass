@@ -2,12 +2,11 @@ package bcbp
 
 import (
     "encoding/json"
-    "errors"
-    "fmt"
     "strconv"
     "strings"
     "time"
     "unicode"
+    "unicode/utf8"
     "unsafe"
 )
 
@@ -31,8 +30,7 @@ type BCBP struct {
     PassengerName string `json:"passenger_name"`
 
     // ElectronicTicketIndicator is a flag that indicates whether or not
-    // the boarding pass is issued against an electronic ticket. E otherwise
-    // whitespace.
+    // the boarding pass is issued against an electronic ticket. E or L.
     ElectronicTicketIndicator string `json:"electronic_ticket_indicator"`
 
     // Version number is the version of IATA 792 spec that is used to encode
@@ -101,9 +99,9 @@ type BCBP struct {
     // bag tag license plate number(s). This is a 13 character field encoded
     // in the following format:
     //       0: "0" for interline tag, "1" for fall-back tag, "2" for interline rush tag
-    //     2-4: Carrier numeric code
-    //    5-10: Carrier initial tag number with leading zeroes
-    //   11-13: Number of consecutive bags (up to 999)
+    //     1-3: Carrier numeric code
+    //     4-9: Carrier initial tag number with leading zeroes
+    //   10-12: Number of consecutive bags (up to 999)
     BaggageTagLicensePlateNumber string `json:"baggage_tag_license_plate_number,omitempty"`
 
     // FirstNonConsecutiveBaggageTagLicensePlateNumber represents additional
@@ -127,12 +125,19 @@ type BCBP struct {
     // SecurityData is used to verify that the boarding pass was not tampered.
     SecurityData string `json:"security_data,omitempty"`
 
+    // data is the data encoded on a Bar Coded Boarding Pass.
+    data string
+
     // dateBuf is used as a buffer when using time.AppendFormat() to convert
     // Julian dates into RFC3339 full-date formats (2006-01-02).
     //
     // See https://segment.com/blog/allocation-efficiency-in-high-performance-go-services/
     // for more information.
     dateBuf []byte
+
+    // pos is the starting index of the character being processed in data.
+    // This is used by whitespace() for pretty printing error reports.
+    pos int
 }
 
 // Legs is an array of 4 Leg.
@@ -146,26 +151,17 @@ func (l Legs) MarshalJSON() ([]byte, error) {
         if l[i] == (Leg{}) {
             continue
         }
-        b, err := json.Marshal(l[i])
-        if err != nil {
-            return []byte{}, err
-        }
-        _, err = sb.Write(b)
-        if err != nil {
-            return []byte{}, err
-        }
-        _, err = sb.WriteString(",")
-        if err != nil {
-            return []byte{}, err
-        }
+
+        // Realistically should not return an error. According to the
+        // documentation, json.Marshal will return an UnsupportedTypeError if
+        // v is a channel, complex, or function value. Since Leg is a data
+        // model for a flight segment it will only contain built-in types.
+        b, _ := json.Marshal(l[i])
+        sb.Write(b)
+        sb.WriteString(",")
     }
     return []byte("[" + strings.TrimSuffix(sb.String(), ",") + "]"), nil
 }
-
-// ErrInvalidFieldFormat is returned by FromStr when processing of an item failed
-// due to the format of the field not matching the format specified by the
-// item.
-var ErrInvalidFieldFormat = errors.New("bcbp: invalid item format")
 
 // Leg is a flight segment. The repeated fields of a Bar Coded Boarding Pass
 // are captured in each Leg.
@@ -196,7 +192,7 @@ type Leg struct {
 
     // FlightNumber is the number of the flight.
     //
-    // The formatting is up to 4 numerics with leading zeroes followed by an
+    // The formatting is up to 4 digits with leading zeroes followed by an
     // optional alpha suffix or whitespace.
     FlightNumber string `json:"flight_number"`
 
@@ -244,7 +240,7 @@ type Leg struct {
 
     // SeatNumber is the seat assigned to the passenger.
     //
-    // The formatting is 3 numerics with leading zeroes followed by an alpha.
+    // The formatting is 3 digits with leading zeroes followed by an alpha.
     // There are exceptions where the 4 characters can be:
     //   INF
     //   GATE
@@ -254,7 +250,7 @@ type Leg struct {
     // CheckInSequenceNumber is the order in which the passenger has checked-in
     // for the flight.
     //
-    // The formatting is 4 numerics with leading zeroes followed by an optional
+    // The formatting is 4 digits with leading zeroes followed by an optional
     // alpha or whitespace. Infant passengers are an exception in which case
     // 5 alphanumeric characters may be used.
     CheckInSequenceNumber string `json:"check_in_sequence_number"`
@@ -285,7 +281,7 @@ type Leg struct {
     //
     // See here - https://www.iata.org/en/publications/directories/code-search/.
     //
-    // The formatting is right justified 3 numerics with leading zeroes.
+    // The formatting is right justified 3 digits with leading zeroes.
     AirlineNumericCode string `json:"airline_numeric_code,omitempty"`
 
     // DocumentFormSerialNumber is the document number which is comprised of:
@@ -389,54 +385,50 @@ type Leg struct {
 // FromStr creates a new BCBP from s.
 func FromStr(s string) (BCBP, error) {
     if len(s) < 60 {
-        return BCBP{}, ErrInsufficientData
+        return BCBP{}, InsufficientData(s, len(s))
     }
 
-    if !ascii(s) {
-        return BCBP{}, ErrNonASCII
+    if pos, ok := ascii(s); !ok {
+        val, _ := utf8.DecodeRuneInString(s[pos:])
+        return BCBP{}, NonASCII(s, pos+1, val)
     }
 
     if s[0:1] != "M" {
-        return BCBP{}, ErrUnsupportedFormat
+        return BCBP{}, UnsupportedBoardingPass(s, s[0:1])
     }
 
     return fromStr(s)
 }
 
-// ErrInsufficientData is returned by FromStr when the string provided is
-// less than 60 characters. The IATA 792 specification states that the
-// length of the mandatory section of a Bar Coded Boarding Pass is 60
-// characters.
-var ErrInsufficientData = errors.New("bcbp: insufficient data")
-
-func ascii(s string) bool {
+// ascii checks s to determine if it contains only ASCII characters.
+// If a unicode character is found then the index of the rune is
+// returned.
+func ascii(s string) (int, bool) {
     for i := 0; i < len(s); i++ {
         if s[i] > unicode.MaxASCII {
-            return false
+            return i, false
         }
     }
-    return true
+    return 0, true
 }
 
-// ErrNonASCII is returned by FromStr when the string provided contains
-// non ASCII characters.
-var ErrNonASCII = errors.New("bcbp: contains non ASCII characters")
-
-// ErrUnsupportedFormat is returned by FromStr when the Format Code is not "M".
-var ErrUnsupportedFormat = errors.New("bcbp: not an IATA BCBP Type M boarding pass")
-
 func fromStr(s string) (BCBP, error) {
-    legs, err := strconv.Atoi(s[1:2])
-    if err != nil {
-        return BCBP{}, fmt.Errorf("bcbp: could not convert Number of Legs Encoded %v to int: %w", s[1:2], ErrInvalidFieldFormat)
+    if !spec[numberOfLegsEncoded].validate(s[1:2]) {
+        return BCBP{},
+            InvalidDataFormat(s, 2, spec[numberOfLegsEncoded], s[1:2])
     }
+
+    // No need to check error as data validation happens above
+    legs, _ := strconv.Atoi(s[1:2])
 
     // Dates use RFC-3339 full-date format. These are 10 bytes long.
     // Allocate a 16 byte array, create a slice, and assign to dateBuf.
     buf := [16]byte{}
     b := BCBP{
+        data:                s,
         NumberOfLegsEncoded: uint(legs),
         dateBuf:             buf[:0],
+        pos:                 1,
     }
 
     // Iterate over the number of legs specified and recursively process the
@@ -457,7 +449,7 @@ func fromStr(s string) (BCBP, error) {
 
             processed, err := b.setFieldByItem(s, item, leg)
             if err != nil {
-                return b, fmt.Errorf("failed to set field by item: %v: %w", item.description, err)
+                return b, err
             }
             s = s[processed:]
         }
@@ -472,18 +464,24 @@ func fromStr(s string) (BCBP, error) {
     // character, which marks the beginning of security section, then return
     // ErrProcessItemFailed.
     if s[0:1] != "^" {
-        return BCBP{}, fmt.Errorf("bcbp: Beginning of Security Data %v is not \"^\": %w", s[0:1], ErrInvalidFieldFormat)
+        return b, InvalidDataFormat(b.data, b.pos, spec[fieldSizeOfVariableSizeField+1], s[0:1])
     }
 
     // Security items start after fieldSizeOfVariableSizeField in spec.
     for _, item := range spec[fieldSizeOfVariableSizeField+1:] {
         processed, err := b.setFieldByItem(s, item, 0)
         if err != nil {
-            return b, fmt.Errorf("failed to set field by item: %v: %w", item.description, err)
+            return b, err
         }
         s = s[processed:]
     }
 
+    // At this point decoding should be successfully completed and s should
+    // be empty. If not, then that means the barcode data has extra unprocessed
+    // characters.
+    if s != "" {
+        return b, UnknownData(b.data, b.pos, s)
+    }
     return b, nil
 }
 
@@ -517,20 +515,18 @@ func (b *BCBP) setFieldByItem(s string, item item, leg int) (int, error) {
     }
 
     itemLen := item.length
-    // forIndividualAirlineUse does not have a static length. It's length is
-    // the remainder of the conditional section of the Bar Coded Boarding Pass.
-    if item.id == forIndividualAirlineUse {
+    // forIndividualAirlineUse and lengthOfSecurityData do not have a static
+    // length. It's length is the remainder of the conditional section of the
+    // Bar Coded Boarding Pass.
+    switch item.id {
+    case forIndividualAirlineUse,
+        securityData:
         itemLen = len(s)
     }
 
-    // If the length of the item is greater than the length of s then
-    // the Bar Coded Boarding Pass is malformed and is missing data.
-    if itemLen > len(s) {
-        return 0, fmt.Errorf(
-            "failed to set field: %v: length of field exceeded input by: %v: %w",
-            item.description,
-            len(s)-itemLen,
-            ErrUnexpectedEndOfInput)
+    // Validate that the data matches the item's format.
+    if !item.validate(s[:itemLen]) {
+        return 0, InvalidDataFormat(b.data, b.pos, item, s[:itemLen])
     }
 
     // Substring the value and assign to the appropriate BCBP field based on
@@ -558,15 +554,8 @@ func (b *BCBP) setFieldByItem(s string, item item, leg int) (int, error) {
         // of the buffer instead of at the end.
         b.dateBuf = b.dateBuf[:0]
 
-        d, err := strconv.Atoi(val)
-        if err != nil {
-            return itemLen, fmt.Errorf(
-                "bcbp: could not conver %v %v to date: %w",
-                item.description,
-                val,
-                err)
-        }
-
+        // item.validate() ensures val is a number, no need to check error
+        d, _ := strconv.Atoi(val)
         t := time.Date(time.Now().Year(), time.January, 0, 0, 0, 0, 0, time.UTC)
         t = t.AddDate(0, 0, d)
         b.dateBuf = t.AppendFormat(b.dateBuf, "2006-01-02")
@@ -582,25 +571,9 @@ func (b *BCBP) setFieldByItem(s string, item item, leg int) (int, error) {
         b.Legs[leg].CheckInSequenceNumber = val
     case passengerStatus:
         b.Legs[leg].PassengerStatus = val
-    case beginningOfVersionNumber:
-        // No need to set the item since it is just a meta field. However,
-        // validate that the field is ">".
-        if val != ">" {
-            return itemLen, fmt.Errorf(
-                "bcbp: %v %v is not \">\": %w",
-                item.description,
-                val,
-                ErrInvalidFieldFormat)
-        }
     case versionNumber:
-        n, err := strconv.Atoi(val)
-        if err != nil {
-            return itemLen, fmt.Errorf(
-                "bcbp: could not convert %v %v to int: %w",
-                item.description,
-                val,
-                ErrInvalidFieldFormat)
-        }
+        // item.validate() ensures val is a number, no need to check error
+        n, _ := strconv.Atoi(val)
         b.VersionNumber = uint(n)
     case passengerDescription:
         b.PassengerDescription = val
@@ -613,26 +586,13 @@ func (b *BCBP) setFieldByItem(s string, item item, leg int) (int, error) {
         // of the buffer instead of at the end.
         b.dateBuf = b.dateBuf[:0]
 
-        y, err := strconv.Atoi(val[:1])
-        if err != nil {
-            return itemLen, fmt.Errorf(
-                "bcbp: could not conver %v %v to date: %w",
-                item.description,
-                val,
-                err)
-        }
+        // item.validate() ensures val is a number, no need to check error
+        y, _ := strconv.Atoi(val[:1])
         n := time.Now().Year() % 10
         y -= n
 
-        d, err := strconv.Atoi(val[1:])
-        if err != nil {
-            return itemLen, fmt.Errorf(
-                "bcbp: could not conver %v %v to date: %w",
-                item.description,
-                val,
-                err)
-        }
-
+        // item.validate() ensures val is a number
+        d, _ := strconv.Atoi(val[1:])
         t := time.Date(time.Now().Year(), time.January, 0, 0, 0, 0, 0, time.UTC)
         t = t.AddDate(y, 0, d)
         b.dateBuf = t.AppendFormat(b.dateBuf, "2006-01-02")
@@ -680,7 +640,10 @@ func (b *BCBP) setFieldByItem(s string, item item, leg int) (int, error) {
 
     // Reassign s to the remaining unprocessed characters.
     s = s[itemLen:]
+
     if item.items == nil {
+        // Set the position of the next character to be processed.
+        b.pos += itemLen
         return itemLen, nil
     }
 
@@ -690,32 +653,32 @@ func (b *BCBP) setFieldByItem(s string, item item, leg int) (int, error) {
     //   fieldSizeOfVariableSizeField
     //   fieldSizeOfFollowingStructuredMessageUnique
     //   fieldSizeOfFollowingStructuredMessageRepeated
+    //   lengthOfSecurityData
     //
     // If the current item is neither of these then ErrMalformedSpec is
     // returned. Otherwise, convert val from a hex string to int and slice
     // s up to the length of the section.
     if item.id != fieldSizeOfVariableSizeField &&
         item.id != fieldSizeOfFollowingStructuredMessageUnique &&
-        item.id != fieldSizeOfFollowingStructuredMessageRepeated {
-        return itemLen, fmt.Errorf("unexpected item %v: %w", item.description, ErrMalformedSpec)
+        item.id != fieldSizeOfFollowingStructuredMessageRepeated &&
+        item.id != lengthOfSecurityData {
+        return itemLen, MalformedSpec(b.data, b.pos, item)
     }
     sectionLen, err := strconv.ParseInt(val, 16, 32)
     if err != nil {
-        return itemLen, fmt.Errorf("bcbp: could not convert %v %v to int: %w", item.description, val, ErrInvalidFieldFormat)
+        return itemLen, InvalidDataFormat(b.data, b.pos, item, val)
     }
 
     // If the sub-section length is greater than the length of s then
     // the Bar Coded Boarding Pass is malformed and is missing data.
     if int(sectionLen) > len(s) {
-        return itemLen, fmt.Errorf(
-            "failed to process subsection: %v: itemLen of field exceeded input by: %v: %w",
-            item.description,
-            len(s)-int(sectionLen),
-            ErrUnexpectedEndOfInput)
+        return itemLen, UnexpectedEndOfInput(b.data, b.pos+item.length, item, s, int(sectionLen))
     }
 
     // Substring s based on the length of the sub-section.
     sectionStr := s[:sectionLen]
+    // Set the position of the next character to be processed.
+    b.pos += itemLen
     for _, subItem := range item.items {
         // If sectionStr is empty then processing of the sub-section is
         // complete. No need to continue processing.
@@ -739,13 +702,3 @@ func (b *BCBP) setFieldByItem(s string, item item, leg int) (int, error) {
 
     return itemLen, nil
 }
-
-// ErrUnexpectedEndOfInput is returned by FromStr when the length specified by
-// an item exceeds the length of s.
-var ErrUnexpectedEndOfInput = errors.New("bcbp: unexpected end of input")
-
-// ErrMalformedSpec is returned by FromStr when a sub-section is expected to be
-// processed, however the item being processed is not the correct type. This
-// error indicates an issue introduced by a code change rather than an issue
-// with usage.
-var ErrMalformedSpec = errors.New("bcbp: malformed spec")

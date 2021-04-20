@@ -1,0 +1,6 @@
+bcbp: Unexpected end of input:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       EABC123 YULFRAAC 0834 326J001A0025 106>50001"
+  |                                                                    ^ got "0" character(s)
+  |
+  = reason: "Field Size of following structured message - repeated" must have at least 1 character(s)

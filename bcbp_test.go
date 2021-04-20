@@ -2,10 +2,10 @@ package bcbp
 
 import (
     "encoding/json"
-    "errors"
     "flag"
     "os"
     "path/filepath"
+    "strings"
     "testing"
 
     "github.com/google/go-cmp/cmp"
@@ -15,60 +15,18 @@ import (
 // a new test input file is added or there is a change in logic.
 var update = flag.Bool("update", false, "update .golden files") //nolint
 
-func TestFromStr_Errors(t *testing.T) {
-    tests := []struct {
-        name string
-        s    string
-        want error
-    }{
-        {
-            name: "Insufficient data",
-            s:    "",
-            want: ErrInsufficientData,
-        },
-        {
-            name: "Non ASCII characters",
-            s:    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789世界",
-            want: ErrNonASCII,
-        },
-        {
-            name: "Unsupported format",
-            s:    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-            want: ErrUnsupportedFormat,
-        },
-        {
-            name: "Invalid field format (Number Of Legs Encoded)",
-            s:    "MbcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-            want: ErrInvalidFieldFormat,
-        },
-        {
-            name: "Invalid field format (Beginning of Version Number)",
-            s:    "M1DESMARAIS/LUC       EABC123 YULFRAAC 0834 326J001A0025 1010",
-            want: ErrInvalidFieldFormat,
-        },
-        {
-            name: "Invalid field format (Beginning of Security Data)",
-            s:    "M1DESMARAIS/LUC       EABC123 YULFRAAC 0834 326J001A0025 1000",
-            want: ErrInvalidFieldFormat,
-        },
-    }
-
-    for _, tt := range tests {
-        t.Run(tt.name, func(t *testing.T) {
-            _, got := FromStr(tt.s)
-            if got == nil {
-                t.Errorf("FromStr() = %+v: want %+v", got, tt.want)
-            }
-
-            if !errors.Is(got, tt.want) {
-                t.Errorf("FromStr() = %+v: want %+v", got, tt.want)
-            }
-        })
-    }
+func TestFromStr(t *testing.T) {
+    testFromStr(t, "testdata/*.input", false)
 }
 
-func TestFromStr(t *testing.T) {
-    match, err := filepath.Glob("testdata/*.input")
+func TestFromStr_Errors(t *testing.T) {
+    testFromStr(t, "testdata/errors/*.input", true)
+}
+
+func testFromStr(t *testing.T, in string, wantErr bool) {
+    t.Helper()
+
+    match, err := filepath.Glob(in)
     if err != nil {
         t.Fatal(err)
     }
@@ -78,16 +36,34 @@ func TestFromStr(t *testing.T) {
             data, err := os.ReadFile(in)
             if err != nil {
                 t.Errorf("failed reading .input file: %v", err)
+                return
             }
 
+            // Special case for malformed spec scenario where spec needs
+            // to be modified
+            if strings.Contains(in, "malformed_spec") {
+                defer func() {
+                    spec[0].items = nil
+                }()
+                spec[0].items = []item{}
+            }
+
+            var got []byte
             b, err := FromStr(string(data))
-            if err != nil {
-                t.Errorf("FromStr(%v) returned unexpected error: %+v", data, err)
-            }
-
-            got, err := json.MarshalIndent(b, "", "  ")
-            if err != nil {
-                t.Errorf("json.MarshalIndent() returned unexpected error: %+v", err)
+            switch {
+            case wantErr && err == nil:
+                t.Error("FromStr() = nil: expected error")
+                return
+            case wantErr && err != nil:
+                got = []byte(err.Error())
+            case err != nil:
+                t.Errorf("FromStr(%s) returned unexpected error: %+v", data, err)
+                return
+            default:
+                got, err = json.MarshalIndent(b, "", "  ")
+                if err != nil {
+                    t.Errorf("json.MarshalIndent() returned unexpected error: %+v", err)
+                }
             }
 
             runFromStrTest(t, got, in)

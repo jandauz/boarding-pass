@@ -1,0 +1,6 @@
+bcbp: Invalid data format:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       EABC123 YULFRAAC 0834 326J001A0025 167>5321WW1325BAC 0014123456002001!12346700100141234789012A0141234567890 1AC AC 1234567890123    4PCYLX58Z"
+  |                                                                                          ^ got "001!123467001"
+  |
+  = reason: data for "1st Non-Consecutive Baggage Tag License Plate Number" must be 13 digits

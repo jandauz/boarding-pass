@@ -1,0 +1,6 @@
+bcbp: Unexpected end of input:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       EABC123 YULFRAAC 0834 326J001A0025 106>5000"
+  |                                                              ^ got "5" character(s)
+  |
+  = reason: "Field Size of variable size field" must have at least 6 character(s)

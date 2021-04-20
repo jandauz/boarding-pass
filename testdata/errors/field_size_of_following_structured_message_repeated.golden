@@ -1,0 +1,6 @@
+bcbp: Invalid data format:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       EABC123 YULFRAAC 0834 326J001A0025 167>5321WW1325BAC 001412345600200141234670010014123478901GG0141234567890 1AC AC 1234567890123    4PCYLX58Z"
+  |                                                                                                                    ^ got "GG"
+  |
+  = reason: data for "Field Size of following structured message - repeated" must be a hex number with leading zeroes

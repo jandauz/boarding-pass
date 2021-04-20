@@ -1,0 +1,6 @@
+bcbp: Invalid data format:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       EABC123 YULFRAAC 0834 3261001A0025 100"
+  |                                                 ^ got "1"
+  |
+  = reason: data for "Compartment Code" must be an alpha character

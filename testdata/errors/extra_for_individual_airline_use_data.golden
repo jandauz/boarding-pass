@@ -1,0 +1,6 @@
+bcbp: Invalid data format:
+  boarding pass data:
+  | "M1DESMARAIS/LUC       EABC123 YULFRAAC 0834 326J001A0025 10B>50000LX58Z5"
+  |                                                                         ^ got "5"
+  |
+  = reason: data for "Beginning of Security data" must be "^"

@@ -1,3 +1,5 @@
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/jandauz/boarding-pass)
+
 # boarding-pass
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/jandauz/boarding-pass/Go)
 ![Codecov](https://img.shields.io/codecov/c/github/jandauz/boarding-pass)

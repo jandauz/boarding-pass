@@ -4,6 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/jandauz/boarding-pass)](https://goreportcard.com/report/github.com/jandauz/boarding-pass)
 [![Go Reference](https://pkg.go.dev/badge/github.com/jandauz/boarding-pass/bcbp.svg)](https://pkg.go.dev/github.com/jandauz/boarding-pass/bcbp)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjandauz%2Fboarding-pass.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjandauz%2Fboarding-pass?ref=badge_shield)
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/jandauz/boarding-pass)
 
 boarding-pass is a partial [Go](https://golang.org) port of
 [georgesmith64/bcbp](https://github.com/georgesmith46/bcbp) with some

@@ -7,7 +7,6 @@ import (
 	"time"
 	"unicode"
 	"unicode/utf8"
-	"unsafe"
 )
 
 // BCBP is a structured representation of an IATA 792 Bar Coded Boarding Pass.
@@ -464,6 +463,9 @@ func fromStr(s string) (BCBP, error) {
 	// character, which marks the beginning of security section, then return
 	// ErrProcessItemFailed.
 	if s[0:1] != "^" {
+		if s[0:1] == " " {
+			return b, nil
+		}
 		return b, InvalidDataFormat(b.data, b.pos, spec[fieldSizeOfVariableSizeField+1], s[0:1])
 	}
 
@@ -539,6 +541,9 @@ func (b *BCBP) setFieldByItem(s string, item item, leg int) (int, error) {
 		b.PassengerName = val
 	case electronicTicketIndicator:
 		b.ElectronicTicketIndicator = val
+		if b.ElectronicTicketIndicator == " " {
+			b.ElectronicTicketIndicator = "L"
+		}
 	case operatingCarrierPNRCode:
 		b.Legs[leg].OperatingCarrierPNRCode = val
 	case fromCityAirportCode:
@@ -550,19 +555,16 @@ func (b *BCBP) setFieldByItem(s string, item item, leg int) (int, error) {
 	case flightNumber:
 		b.Legs[leg].FlightNumber = val
 	case dateOfFlight:
-		// Re-slice dateBuf so that we append the date format at the start
-		// of the buffer instead of at the end.
-		b.dateBuf = b.dateBuf[:0]
 
 		// item.validate() ensures val is a number, no need to check error
 		d, _ := strconv.Atoi(val)
 		t := time.Date(time.Now().Year(), time.January, 0, 0, 0, 0, 0, time.UTC)
 		t = t.AddDate(0, 0, d)
-		b.dateBuf = t.AppendFormat(b.dateBuf, "2006-01-02")
 
-		// See https://github.com/golang/go/issues/25484#issuecomment-391415660.
-		// This copies strings.Builder.String() way of copying byte array to string.
-		b.Legs[leg].DateOfFlight = *(*string)(unsafe.Pointer(&b.dateBuf))
+		dateBuf := []byte("")
+		dateBuf = t.AppendFormat(dateBuf, "2006-01-02")
+
+		b.Legs[leg].DateOfFlight = string(dateBuf)
 	case compartmentCode:
 		b.Legs[leg].CompartmentCode = val
 	case seatNumber:
@@ -582,9 +584,10 @@ func (b *BCBP) setFieldByItem(s string, item item, leg int) (int, error) {
 	case sourceOfBoardingPassIssuance:
 		b.SourceOfBoardingPassIssuance = val
 	case dateOfIssueOfBoardingPass:
-		// Re-slice dateBuf so that we append the date format at the start
-		// of the buffer instead of at the end.
-		b.dateBuf = b.dateBuf[:0]
+
+		if len(val) == 0 {
+			break
+		}
 
 		// item.validate() ensures val is a number, no need to check error
 		y, _ := strconv.Atoi(val[:1])
@@ -595,11 +598,11 @@ func (b *BCBP) setFieldByItem(s string, item item, leg int) (int, error) {
 		d, _ := strconv.Atoi(val[1:])
 		t := time.Date(time.Now().Year(), time.January, 0, 0, 0, 0, 0, time.UTC)
 		t = t.AddDate(y, 0, d)
-		b.dateBuf = t.AppendFormat(b.dateBuf, "2006-01-02")
 
-		// See https://github.com/golang/go/issues/25484#issuecomment-391415660.
-		// This copies strings.Builder.String() way of copying byte array to string.
-		b.DateOfIssueOfBoardingPass = *(*string)(unsafe.Pointer(&b.dateBuf))
+		dateBuf := []byte("")
+		dateBuf = t.AppendFormat(dateBuf, "2006-01-02")
+
+		b.DateOfIssueOfBoardingPass = string(dateBuf)
 	case documentType:
 		b.DocumentType = val
 	case airlineDesignatorOfBoardingPassIssuer:

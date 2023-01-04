@@ -5,9 +5,10 @@ import "regexp"
 // item represents an item in the IATA 729 Bar Coded Boarding Pass specification.
 //
 // An item can belong to one of 3 main categories:
-//   Mandatory
-//   Conditional
-//   Security
+//
+//	Mandatory
+//	Conditional
+//	Security
 //
 // An item also is either unique or repeated. A unique item only appears once,
 // whereas a repeated item appears once for each flight segment.
@@ -26,6 +27,9 @@ type item struct {
 
 // validate validates s against item.regex.
 func (i item) validate(s string) bool {
+	if i.id == beginningOfSecurityData && len(s) == 0 {
+		return true
+	}
 	return i.regex.FindString(s) != ""
 }
 

@@ -2,11 +2,12 @@ package bcbp_test
 
 import (
 	"fmt"
+	"testing"
 
-	"github.com/jandauz/boarding-pass"
+	bcbp "github.com/jandauz/boarding-pass"
 )
 
-func ExampleFromStr() {
+func ExampleFromStr(t *testing.T) {
 	const s = "M1DESMARAIS/LUC       EABC123 YULFRAAC 0834 326J001A0025 100"
 	b, err := bcbp.FromStr(s)
 	if err != nil {
